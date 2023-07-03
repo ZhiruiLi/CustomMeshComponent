@@ -267,7 +267,7 @@ public:
 
 				//Get the needed data from the static mesh of the mesh section
 				//We're assuming that there's only one LOD
-				auto& LODResource = SrcSection.StaticMesh->RenderData->LODResources[0];
+				auto& LODResource = SrcSection.StaticMesh->GetRenderData()->LODResources[0];
 
 				FDeformMeshVertexFactory* VertexFactory= &NewSection->VertexFactory;
 				//Initialize the vertex factory with the vertex data from the static mesh using the helper function defined above
@@ -317,7 +317,7 @@ public:
 
 			//We first create a resource array to use it in the create info for initializing the structured buffer on creation
 			TResourceArray<FMatrix>* ResourceArray = new TResourceArray<FMatrix>(true);
-			FRHIResourceCreateInfo CreateInfo;
+			FRHIResourceCreateInfo CreateInfo(TEXT("DeformTransform"));
 			ResourceArray->Append(DeformTransforms);
 			CreateInfo.ResourceArray = ResourceArray;
 			//Set the debug name so we can find the resource when debugging in RenderDoc
@@ -589,7 +589,13 @@ IMPLEMENT_VERTEX_FACTORY_PARAMETER_TYPE(FDeformMeshVertexFactory, SF_Vertex, FDe
 
 ///////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_VERTEX_FACTORY_TYPE(FDeformMeshVertexFactory, "/CustomShaders/LocalVertexFactory.ush", true, true, true, true, true);
+IMPLEMENT_VERTEX_FACTORY_TYPE(FDeformMeshVertexFactory, "/CustomShaders/LocalVertexFactory.ush",
+	  EVertexFactoryFlags::UsedWithMaterials
+	| EVertexFactoryFlags::SupportsDynamicLighting
+	| EVertexFactoryFlags::SupportsStaticLighting
+	| EVertexFactoryFlags::SupportsPrecisePrevWorldPos
+	| EVertexFactoryFlags::SupportsPositionOnly
+	);
 
 ///////////////////////////////////////////////////////////////////////
 
